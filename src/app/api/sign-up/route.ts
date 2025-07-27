@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
 
 export async function POST(request: Request){
@@ -13,25 +13,23 @@ export async function POST(request: Request){
             isVerified: true
         })
 
-        if(existingUserVerifiedByUsername) {
+        if (existingUserVerifiedByUsername) {
             return Response.json({
                 success: false,
                 message: "Username is already taken"
-            }, {
-                status: 400
-            })
+            }, { status: 400 })
         }
 
         const existingUserByEmail = await UserModel.findOne({email})
 
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString()
 
-        if(existingUserByEmail) {
+        if (existingUserByEmail) {
             if (existingUserByEmail.isVerified) {
                 return Response.json({
                     success: false,
                     message: "User already exist with this email"
-                }, {status: 500})
+                }, { status: 500 })
             } else {
                 const hashedPassword = await bcrypt.hash(password, 10)
                 existingUserByEmail.password = hashedPassword;
@@ -78,7 +76,7 @@ export async function POST(request: Request){
         }, {status: 201})
 
     } catch (error) {
-        console.error('Error registering user', error)
+        console.error("Error registering user", error)
         return Response.json({
             success: false,
             message: "Error registering user"
